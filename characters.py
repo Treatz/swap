@@ -1758,11 +1758,13 @@ class Character(DefaultCharacter):
             session (Session): Session controlling the connection that
                 just disconnected.
             """
-            if not self.sessions.count():
-               # only remove this char from grid if no sessions control it anymore.
-               if self.location:
-                  self.location.for_contents(message, exclude=[self], from_obj=self)
-                  self.db.prelogout_location = self.location
-                  self.location = self.db.prelogout_location
+        if not self.sessions.count():
+            # only remove this char from grid if no sessions control it anymore.
+            if self.location:
+                def message(obj, from_obj):
+                    obj.msg("%s has quit the game!" % self.get_display_name(obj), from_obj=from_obj)
+                self.location.for_contents(message, exclude=[self], from_obj=self)
+                self.db.prelogout_location = self.location
+                self.location = None
                   self.ndb._menutree.close_menu()
                   self.db.target.ndb._menutree.close_menu()
